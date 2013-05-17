@@ -1,17 +1,16 @@
 package com.elgoooog.challonge;
 
-import com.elgoooog.challonge.model.Participant;
-import com.elgoooog.challonge.model.Tournament;
-import com.elgoooog.challonge.model.TournamentState;
-import com.elgoooog.challonge.model.TournamentType;
+import com.elgoooog.challonge.model.*;
 import com.elgoooog.challonge.request.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Nicholas Hauschild
@@ -23,7 +22,7 @@ public class ChallongeTest {
 
     @Before
     public void setup() {
-        challonge = new Challonge("");
+        challonge = new Challonge("your api key here");
     }
 
     @Test
@@ -76,11 +75,58 @@ public class ChallongeTest {
     }
 
     @Test
+    public void updateParticipantTest() {
+        final UpdateParticipantRequest request = new UpdateParticipantRequest.Builder("sceond", 7530437)
+                .withName("pop")
+                .build();
+        final Participant participant = challonge.updateParticipant(request);
+        assertEquals("pop", participant.getName());
+    }
+
+    @Test
+    public void deleteParticipantTest() {
+        final DeleteParticipantRequest request = new DeleteParticipantRequest("sceond", 7530437);
+        final Participant participant = challonge.deleteParticipant(request);
+        assertEquals("pop", participant.getName());
+    }
+
+    @Test
     public void ggeettParticipantTest() {
         final GetParticipantRequest request = new GetParticipantRequest.Builder("sceond", 7530437)
                 .build();
         final Participant participant = challonge.getParticipant(request);
         assertEquals("bob", participant.getName());
+    }
+
+    @Test
+    public void randomizeSeedsTest() {
+        final RandomizeTournamentSeedsRequest request = new RandomizeTournamentSeedsRequest("sceond");
+        final List<Participant> participants = challonge.randomizeTournamentSeeds(request);
+        assertEquals(3, participants.size());
+    }
+
+    @Test
+    public void listMatchesTest() {
+        final ListMatchRequest request = new ListMatchRequest.Builder("sceond").build();
+        final List<Match> matches = challonge.listMatches(request);
+        assertEquals(3, matches.size());
+    }
+
+    @Test
+    public void ggeettMatchTest() {
+        final GetMatchRequest request = new GetMatchRequest("sceond", 11040933);
+        final Match match = challonge.getMatch(request);
+        assertFalse(match.isHasAttachment());
+    }
+
+    @Test
+    public void updateMatchTest() {
+        final UpdateMatchRequest request = new UpdateMatchRequest.Builder("sceond", 11040933)
+                .withMatchScores(Collections.singletonList(new MatchScore(1, 2)))
+                .doTie(true)
+                .build();
+        final Match match = challonge.updateMatch(request);
+        assertEquals(2, match.getScores().get(0).getPlayerTwoScore());
     }
 
     @Test

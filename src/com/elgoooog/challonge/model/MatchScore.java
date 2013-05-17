@@ -21,4 +21,9 @@ public class MatchScore {
     public int getPlayerTwoScore() {
         return playerTwoScore;
     }
+
+    @Override
+    public String toString() {
+        return playerOneScore + "-" + playerTwoScore;
+    }
 }

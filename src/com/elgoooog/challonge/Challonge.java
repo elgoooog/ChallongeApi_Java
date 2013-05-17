@@ -501,4 +501,153 @@ public class Challonge {
         final HttpResponse httpResponse = httpInvoker.invoke(requestBuilder.build());
         return participantParser.parse(httpResponse.getBody());
     }
+
+    public Participant updateParticipant(final UpdateParticipantRequest request) {
+        final String tournamentUrlPath = request.getTournamentUrlPath();
+        final int participantUrlPath = request.getParticipantId();
+        final HttpRequest.Builder requestBuilder = new HttpRequest.Builder(BASE_URL + "tournaments/"
+            + tournamentUrlPath + "/participants/" + participantUrlPath + ".xml");
+
+        requestBuilder.withMethod(HttpMethod.PUT);
+
+        final String name = request.getName();
+        if(name != null) {
+            requestBuilder.withBodyParam("participant[name]", name);
+        }
+
+        final String challongeUsername = request.getChallongeUsername();
+        if(challongeUsername != null) {
+            requestBuilder.withBodyParam("participant[challonge_username]", challongeUsername);
+        }
+
+        final String email = request.getEmail();
+        if(email != null) {
+            requestBuilder.withBodyParam("participant[email]", email);
+        }
+
+        final Integer seed = request.getSeed();
+        if(seed != null) {
+            requestBuilder.withBodyParam("participant[seed]", seed.toString());
+        }
+
+        final String misc = request.getMisc();
+        if(misc != null) {
+            requestBuilder.withBodyParam("participant[misc]", misc);
+        }
+
+        final HttpResponse httpResponse = httpInvoker.invoke(requestBuilder.build());
+        return participantParser.parse(httpResponse.getBody());
+    }
+
+    public Participant deleteParticipant(final String tournamentUrlPath, final int participantId) {
+        return deleteParticipant(new DeleteParticipantRequest(tournamentUrlPath, participantId));
+    }
+
+    public Participant deleteParticipant(final DeleteParticipantRequest request) {
+        final String tournamentUrlPath = request.getTournamentUrlPath();
+        final int participantUrlPath = request.getParticipantId();
+        final HttpRequest.Builder requestBuilder = new HttpRequest.Builder(BASE_URL + "tournaments/"
+            + tournamentUrlPath + "/participants/" + participantUrlPath + ".xml");
+
+        requestBuilder.withMethod(HttpMethod.DELETE);
+
+        final HttpResponse httpResponse = httpInvoker.invoke(requestBuilder.build());
+        return participantParser.parse(httpResponse.getBody());
+    }
+
+    public List<Participant> randomizeTournamentSeeds(final String tournamentUrlPath) {
+        return randomizeTournamentSeeds(new RandomizeTournamentSeedsRequest(tournamentUrlPath));
+    }
+
+    public List<Participant> randomizeTournamentSeeds(final RandomizeTournamentSeedsRequest request) {
+        final String tournamentUrlPath = request.getTournamentUrlPath();
+        final HttpRequest.Builder requestBuilder = new HttpRequest.Builder(BASE_URL + "tournaments/"
+            + tournamentUrlPath + "/participants/randomize.xml");
+
+        requestBuilder.withMethod(HttpMethod.POST);
+
+        final HttpResponse httpResponse = httpInvoker.invoke(requestBuilder.build());
+        return participantsParser.parse(httpResponse.getBody());
+    }
+
+    public List<Match> listMatches(final String tournamentUrlPath) {
+        final ListMatchRequest request = new ListMatchRequest.Builder(tournamentUrlPath).build();
+        return listMatches(request);
+    }
+
+    public List<Match> listMatches(final ListMatchRequest request) {
+        final String tournamentUrlPath = request.getTournamentUrlPath();
+        final HttpRequest.Builder requestBuilder = new HttpRequest.Builder(BASE_URL + "tournaments/"
+            + tournamentUrlPath + "/matches.xml");
+
+        final String state = request.getState();
+        if(state != null) {
+            requestBuilder.withQueryParam("state", state);
+        }
+
+        final Integer participantId = request.getParticipantId();
+        if(participantId != null) {
+            requestBuilder.withQueryParam("participant_id", participantId.toString());
+        }
+
+        final HttpResponse httpResponse = httpInvoker.invoke(requestBuilder.build());
+        return matchesParser.parse(httpResponse.getBody());
+    }
+
+    public Match getMatch(final String tournamentUrlPath, final int matchId) {
+        return getMatch(new GetMatchRequest(tournamentUrlPath, matchId));
+    }
+
+    public Match getMatch(final GetMatchRequest request) {
+        final String tournamentUrlPath = request.getTournamentUrlPath();
+        final int matchId = request.getMatchId();
+        final HttpRequest.Builder requestBuilder = new HttpRequest.Builder(BASE_URL + "tournaments/"
+            + tournamentUrlPath + "/matches/" + matchId + ".xml");
+
+        final HttpResponse httpResponse = httpInvoker.invoke(requestBuilder.build());
+        return matchParser.parse(httpResponse.getBody());
+    }
+
+    public Match updateMatch(final UpdateMatchRequest request) {
+        final String tournamentUrlPath = request.getTournamentUrlPath();
+        final int matchId = request.getMatchId();
+        final HttpRequest.Builder requestBuilder = new HttpRequest.Builder(BASE_URL + "tournaments/"
+            + tournamentUrlPath + "/matches/" + matchId + ".xml");
+
+        requestBuilder.withMethod(HttpMethod.PUT);
+
+        final List<MatchScore> matchScores = request.getMatchScores();
+        if(matchScores != null) {
+            final StringBuilder allScores = new StringBuilder();
+            for(MatchScore matchScore : matchScores) {
+                allScores.append(matchScore).append(',');
+            }
+            allScores.deleteCharAt(allScores.length() - 1);
+
+            requestBuilder.withBodyParam("match[scores_csv]", allScores.toString());
+        }
+
+        final Integer winnerId = request.getWinnerId();
+        if(winnerId != null) {
+            requestBuilder.withBodyParam("match[winner_id]", winnerId.toString());
+        }
+
+        final Boolean tie = request.isTie();
+        if(tie != null && tie) {
+            requestBuilder.withBodyParam("match[winner_id]", "tie");
+        }
+
+        final Integer playerOneVotes = request.getPlayerOneVotes();
+        if(playerOneVotes != null) {
+            requestBuilder.withBodyParam("match[player1_votes]", playerOneVotes.toString());
+        }
+
+        final Integer playerTwoVotes = request.getPlayerTwoVotes();
+        if(playerTwoVotes != null) {
+            requestBuilder.withBodyParam("match[player2_votes]", playerTwoVotes.toString());
+        }
+
+        final HttpResponse httpResponse = httpInvoker.invoke(requestBuilder.build());
+        return matchParser.parse(httpResponse.getBody());
+    }
 }
